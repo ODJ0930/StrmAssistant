@@ -16,7 +16,7 @@
 已在以下容器中验证插件加载和核心任务：
 
 - `amilys/embyserver:4.9.3.0`
-- `emby/embyserver:4.10.0.14-debug-amd64`
+- `emby/embyserver:4.10.0.14`
 
 验证内容包括：
 
