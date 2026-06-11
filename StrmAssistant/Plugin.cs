@@ -331,7 +331,7 @@ namespace StrmAssistant
 
         public ImageFormat ThumbImageFormat => ImageFormat.Png;
 
-        public override string Description => "Extract MediaInfo and Enable IntroSkip";
+        public override string Description => "\u63d0\u53d6\u5a92\u4f53\u4fe1\u606f\u5e76\u589e\u5f3a\u7247\u5934\u8df3\u8fc7";
 
         public override Guid Id => _id;
 

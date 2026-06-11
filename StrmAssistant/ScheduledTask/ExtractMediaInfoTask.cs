@@ -158,9 +158,8 @@ namespace StrmAssistant.ScheduledTask
             "ExtractMediaInfoTask_Description_Extracts_media_info_from_videos_and_audios",
             Plugin.Instance.DefaultUICulture);
 
-        public string Name => "Extract MediaInfo";
-        //public string Name => Resources.ResourceManager.GetString("ExtractMediaInfoTask_Name_Extract_MediaInfo",
-        //    Plugin.Instance.DefaultUICulture);
+        public string Name => Resources.ResourceManager.GetString("ExtractMediaInfoTask_Name_Extract_MediaInfo",
+            Plugin.Instance.DefaultUICulture);
 
         public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
         {

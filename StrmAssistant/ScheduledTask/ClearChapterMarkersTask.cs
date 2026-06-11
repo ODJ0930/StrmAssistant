@@ -72,9 +72,8 @@ namespace StrmAssistant.ScheduledTask
             "ClearChapterMarkersTask_Description_Clears_behavior_based_intro_and_credits_markers",
             Plugin.Instance.DefaultUICulture);
 
-        public string Name => "Clear Episode Intros";
-        //public string Name => Resources.ResourceManager.GetString("ClearChapterMarkersTask_Name_Clear_Episode_Intros",
-        //    Plugin.Instance.DefaultUICulture);
+        public string Name => Resources.ResourceManager.GetString("ClearChapterMarkersTask_Name_Clear_Episode_Intros",
+            Plugin.Instance.DefaultUICulture);
 
         public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
         {

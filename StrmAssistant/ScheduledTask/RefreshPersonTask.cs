@@ -274,9 +274,8 @@ namespace StrmAssistant.ScheduledTask
         public string Description => Resources.ResourceManager.GetString(
             "RefreshPersonTask_Description_Refreshes_and_repairs_Chinese_actors", Plugin.Instance.DefaultUICulture);
 
-        public string Name => "Refresh Chinese Actor";
-        //public string Name => Resources.ResourceManager.GetString("RefreshPersonTask_Name_Refresh_Chinese_Actor",
-        //    Plugin.Instance.DefaultUICulture);
+        public string Name => Resources.ResourceManager.GetString("RefreshPersonTask_Name_Refresh_Chinese_Actor",
+            Plugin.Instance.DefaultUICulture);
 
         public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
         {

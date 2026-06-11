@@ -48,10 +48,9 @@ namespace StrmAssistant.ScheduledTask
 
         public string Key => "UpdatePluginTask";
 
-        public string Name => "Update Plugin";
-        //public string Name =>
-        //    Resources.ResourceManager.GetString("UpdatePluginTask_Name_Update_Plugin",
-        //        Plugin.Instance.DefaultUICulture);
+        public string Name =>
+            Resources.ResourceManager.GetString("UpdatePluginTask_Name_Update_Plugin",
+                Plugin.Instance.DefaultUICulture);
 
         public string Description => Resources.ResourceManager.GetString(
             "UpdatePluginTask_Description_Updates_plugin_to_the_latest_version", Plugin.Instance.DefaultUICulture);

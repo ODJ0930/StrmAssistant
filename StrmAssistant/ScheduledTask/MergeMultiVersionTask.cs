@@ -165,7 +165,7 @@ namespace StrmAssistant.ScheduledTask
             "MergeMovieTask_Description_Merge_movies_per_library_or_across_libraries_per_preference",
             Plugin.Instance.DefaultUICulture);
 
-        public string Name => "Merge Multi Versions";
+        public string Name => "\u5408\u5e76\u591a\u7248\u672c";
 
         public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
         {

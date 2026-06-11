@@ -49,7 +49,7 @@ namespace StrmAssistant.ScheduledTask
             Resources.ResourceManager.GetString("DeletePersonTask_Description_Deletes_all_persons",
                 Plugin.Instance.DefaultUICulture);
 
-        public string Name => "Delete Persons";
+        public string Name => "\u6e05\u7406\u4eba\u7269\u6570\u636e";
 
         public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
         {

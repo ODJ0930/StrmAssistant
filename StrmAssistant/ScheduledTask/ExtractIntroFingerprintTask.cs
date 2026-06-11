@@ -320,10 +320,9 @@ namespace StrmAssistant.ScheduledTask
             "ExtractIntroFingerprintTask_Description_Extracts_intro_fingerprint_from_episodes",
             Plugin.Instance.DefaultUICulture);
 
-        public string Name => "Extract Intro Fingerprint";
-        //public string Name =>
-        //    Resources.ResourceManager.GetString("ExtractIntroFingerprintTask_Name_Extract_Intro_Fingerprint",
-        //        Plugin.Instance.DefaultUICulture);
+        public string Name =>
+            Resources.ResourceManager.GetString("ExtractIntroFingerprintTask_Name_Extract_Intro_Fingerprint",
+                Plugin.Instance.DefaultUICulture);
 
         public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
         {

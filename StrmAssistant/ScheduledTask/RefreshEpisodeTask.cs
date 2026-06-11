@@ -113,7 +113,7 @@ namespace StrmAssistant.ScheduledTask
             "EpisodeRefreshTask_Description_Refresh_metadata_for_episodes_missing_overview",
             Plugin.Instance.DefaultUICulture);
 
-        public string Name => "Refresh Episode";
+        public string Name => "\u5237\u65b0\u5267\u96c6\u5143\u6570\u636e";
 
         public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
         {
