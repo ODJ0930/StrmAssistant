@@ -115,18 +115,24 @@ namespace StrmAssistant.Common
             return CreateTitleFingerprint(item, directoryService, cancellationToken);
         }
 
-        private Task<object> GetAllFingerprintFilesForSeason(Season season, Episode[] episodes,
+        private async Task<object> GetAllFingerprintFilesForSeason(Season season, Episode[] episodes,
             LibraryOptions libraryOptions, IDirectoryService directoryService, CancellationToken cancellationToken)
         {
-            return (Task<object>)_getAllFingerprintFilesForSeason.Invoke(_audioFingerprintManager,
+            var task = (Task)_getAllFingerprintFilesForSeason.Invoke(_audioFingerprintManager,
                 new object[] { season, episodes, libraryOptions, directoryService, cancellationToken });
+            await task.ConfigureAwait(false);
+            return task.GetType().GetProperty("Result")?.GetValue(task);
         }
 
         private void UpdateSequencesForSeason(Season season, object seasonFingerprintInfo, Episode episode,
-            LibraryOptions libraryOptions, IDirectoryService directoryService)
+            LibraryOptions libraryOptions, IDirectoryService directoryService, CancellationToken cancellationToken)
         {
-            _updateSequencesForSeason.Invoke(_audioFingerprintManager,
-                new[] { season, seasonFingerprintInfo, episode, libraryOptions, directoryService });
+            var parameters = _updateSequencesForSeason.GetParameters();
+            var args = parameters.Length >= 6
+                ? new[] { season, seasonFingerprintInfo, episode, libraryOptions, directoryService, cancellationToken }
+                : new[] { season, seasonFingerprintInfo, episode, libraryOptions, directoryService };
+
+            _updateSequencesForSeason.Invoke(_audioFingerprintManager, args);
         }
 
         public void PatchTimeout(int maxConcurrentCount)
@@ -382,7 +388,8 @@ namespace StrmAssistant.Common
             foreach (var episode in episodesWithoutMarkers)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                UpdateSequencesForSeason(season, seasonFingerprintInfo, episode, libraryOptions, directoryService);
+                UpdateSequencesForSeason(season, seasonFingerprintInfo, episode, libraryOptions, directoryService,
+                    cancellationToken);
 
                 index++;
                 progress?.Report(index / total);

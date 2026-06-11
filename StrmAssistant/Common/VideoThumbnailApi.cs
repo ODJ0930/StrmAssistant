@@ -81,17 +81,32 @@ namespace StrmAssistant.Common
                 ? item.GetMediaSources(false, false, libraryOptions).FirstOrDefault()
                 : null;
 
-            var parameters = AppVer >= Ver4936
-                ? new object[]
-                {
-                    item, mediaSource, null, libraryOptions, directoryService, chapters, extractImages,
-                    saveChapters, cancellationToken
-                }
-                : new object[]
-                {
-                    item, null, libraryOptions, directoryService, chapters, extractImages, saveChapters,
-                    cancellationToken
-                };
+            var methodParameters = _refreshThumbnailImages.GetParameters();
+            object[] parameters;
+            switch (methodParameters.Length)
+            {
+                case 10:
+                    parameters = new object[]
+                    {
+                        item, mediaSource, null, libraryOptions, directoryService, chapters, extractImages,
+                        extractImages, saveChapters, cancellationToken
+                    };
+                    break;
+                case 9:
+                    parameters = new object[]
+                    {
+                        item, mediaSource, null, libraryOptions, directoryService, chapters, extractImages,
+                        saveChapters, cancellationToken
+                    };
+                    break;
+                default:
+                    parameters = new object[]
+                    {
+                        item, null, libraryOptions, directoryService, chapters, extractImages, saveChapters,
+                        cancellationToken
+                    };
+                    break;
+            }
 
             return (Task<bool>)_refreshThumbnailImages.Invoke(_thumbnailGenerator, parameters);
         }

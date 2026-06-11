@@ -62,12 +62,16 @@ namespace StrmAssistant.Common
                 try
                 {
                     _getStaticMediaSources = mediaSourceManager.GetType()
-                        .GetMethod("GetStaticMediaSources",
-                            new[]
-                            {
-                                typeof(BaseItem), typeof(bool), typeof(bool), typeof(bool), typeof(LibraryOptions),
-                                typeof(DeviceProfile), typeof(User)
-                            });
+                        .GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                        .Where(m => m.Name == "GetStaticMediaSources")
+                        .OrderByDescending(m => m.GetParameters().Length)
+                        .FirstOrDefault(m =>
+                        {
+                            var parameters = m.GetParameters();
+                            return parameters.Length >= 7 &&
+                                   parameters[0].ParameterType == typeof(BaseItem) &&
+                                   parameters.Any(p => p.ParameterType == typeof(LibraryOptions));
+                        });
                     _fallbackApproach = true;
                 }
                 catch (Exception e)
@@ -90,13 +94,11 @@ namespace StrmAssistant.Common
                 var embyServerImplementationsAssembly = Assembly.Load("Emby.Server.Implementations");
                 var libraryMonitorImpl =
                     embyServerImplementationsAssembly.GetType("Emby.Server.Implementations.IO.LibraryMonitor");
-                var alwaysIgnoreExtensions = libraryMonitorImpl.GetField("_alwaysIgnoreExtensions",
-                    BindingFlags.Instance | BindingFlags.NonPublic);
-                var currentArray = (string[])alwaysIgnoreExtensions.GetValue(libraryMonitor);
-                var newArray = new string[currentArray.Length + 1];
-                Array.Copy(currentArray, newArray, currentArray.Length);
-                newArray[newArray.Length - 1] = ".json";
-                alwaysIgnoreExtensions.SetValue(libraryMonitor, newArray);
+                if (!TryAppendStringArrayField(libraryMonitorImpl, libraryMonitor, "_alwaysIgnoreExtensions", ".json"))
+                {
+                    TryAppendStringArrayField(libraryMonitorImpl, libraryMonitor, "_alwaysIgnoreSubstrings",
+                        MediaInfoFileExtension);
+                }
             }
             catch (Exception e)
             {
@@ -120,8 +122,47 @@ namespace StrmAssistant.Common
         private List<MediaSourceInfo> GetStaticMediaSourcesByRef(BaseItem item, bool enableAlternateMediaSources,
             LibraryOptions libraryOptions)
         {
-            return (List<MediaSourceInfo>)_getStaticMediaSources.Invoke(_mediaSourceManager,
-                new object[] { item, enableAlternateMediaSources, false, false, libraryOptions, null, null });
+            var parameters = _getStaticMediaSources.GetParameters();
+            var collectionFolders = (BaseItem[])_libraryManager.GetCollectionFolders(item);
+
+            object[] args;
+            switch (parameters.Length)
+            {
+                case 10:
+                    args = new object[]
+                    {
+                        item, enableAlternateMediaSources, false, true, true, collectionFolders, libraryOptions, null,
+                        null, CancellationToken.None
+                    };
+                    break;
+                case 8:
+                    args = new object[]
+                    {
+                        item, enableAlternateMediaSources, false, true, collectionFolders, libraryOptions, null, null
+                    };
+                    break;
+                case 7:
+                    args = new object[] { item, enableAlternateMediaSources, false, true, libraryOptions, null, null };
+                    break;
+                default:
+                    args = new object[] { item, false, true, null, null };
+                    break;
+            }
+
+            return (List<MediaSourceInfo>)_getStaticMediaSources.Invoke(_mediaSourceManager, args);
+        }
+
+        private static bool TryAppendStringArrayField(Type targetType, object target, string fieldName, string value)
+        {
+            var field = targetType?.GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+            if (!(field?.GetValue(target) is string[] currentArray)) return false;
+            if (currentArray.Any(v => string.Equals(v, value, StringComparison.OrdinalIgnoreCase))) return true;
+
+            var newArray = new string[currentArray.Length + 1];
+            Array.Copy(currentArray, newArray, currentArray.Length);
+            newArray[newArray.Length - 1] = value;
+            field.SetValue(target, newArray);
+            return true;
         }
 
         public List<MediaSourceInfo> GetStaticMediaSources(BaseItem item, bool enableAlternateMediaSources)

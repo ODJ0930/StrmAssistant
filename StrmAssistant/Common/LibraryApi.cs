@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using static StrmAssistant.Common.LanguageUtility;
@@ -816,11 +817,58 @@ namespace StrmAssistant.Common
 
         public async Task<string> GetStrmMountPath(string strmPath)
         {
-            var path = strmPath.AsMemory();
+            using var mediaMount = await MountStrmPath(strmPath).ConfigureAwait(false);
 
-            using var mediaMount = await _mediaMountManager.Mount(path, null, CancellationToken.None);
-            
-            return mediaMount?.MountedPath;
+            return GetMountedPath(mediaMount);
+        }
+
+        private async Task<IMediaMount> MountStrmPath(string strmPath)
+        {
+            var mountMethod = _mediaMountManager.GetType()
+                .GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                .FirstOrDefault(m =>
+                {
+                    if (m.Name != "Mount") return false;
+                    var parameters = m.GetParameters();
+                    return parameters.Length == 3 &&
+                           (parameters[0].ParameterType == typeof(string) ||
+                            parameters[0].ParameterType == typeof(ReadOnlyMemory<char>));
+                });
+
+            if (mountMethod is null) return null;
+
+            var parameters = mountMethod.GetParameters();
+            var task = (Task)mountMethod.Invoke(_mediaMountManager, new[]
+            {
+                GetMountArgument(parameters[0].ParameterType, strmPath),
+                GetMountArgument(parameters[1].ParameterType, null),
+                CancellationToken.None
+            });
+
+            await task.ConfigureAwait(false);
+            return task.GetType().GetProperty("Result")?.GetValue(task) as IMediaMount;
+        }
+
+        private static object GetMountArgument(Type parameterType, string value)
+        {
+            if (parameterType == typeof(string)) return value;
+            if (parameterType == typeof(ReadOnlyMemory<char>)) return value?.AsMemory() ?? ReadOnlyMemory<char>.Empty;
+
+            return value;
+        }
+
+        private static string GetMountedPath(IMediaMount mediaMount)
+        {
+            if (mediaMount is null) return null;
+
+            var mediaMountType = mediaMount.GetType();
+            if (mediaMountType.GetProperty("MountedPath")?.GetValue(mediaMount) is string mountedPath)
+            {
+                return mountedPath;
+            }
+
+            var mountedPathInfo = mediaMountType.GetProperty("MountedPathInfo")?.GetValue(mediaMount);
+            return mountedPathInfo?.GetType().GetProperty("FullName")?.GetValue(mountedPathInfo) as string;
         }
 
         public BaseItem[] GetItemsByIds(long[] itemIds)
