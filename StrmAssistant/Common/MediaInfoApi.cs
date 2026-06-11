@@ -206,6 +206,14 @@ namespace StrmAssistant.Common
             return mediaInfoJsonPath;
         }
 
+        public bool MediaInfoJsonExists(BaseItem item, IDirectoryService directoryService)
+        {
+            var mediaInfoJsonPath = GetMediaInfoJsonPath(item);
+            var file = directoryService.GetFile(mediaInfoJsonPath);
+
+            return file?.Exists == true;
+        }
+
         private async Task<bool> SerializeMediaInfo(BaseItem item, IDirectoryService directoryService, bool overwrite,
             string source)
         {
